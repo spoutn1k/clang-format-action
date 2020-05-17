@@ -23,6 +23,7 @@ format_diff(){
     diff -q <(cat "${filepath}") <(echo "${local_format}") > /dev/null
     diff_result="$?"
     if [[ "${diff_result}" -ne 0 ]]; then
+# All files improperly formatted will be printed to the output.
 	echo "${filepath} is not formatted correctly." >&2
 	exit_code=1
 	return "${diff_result}"
@@ -35,13 +36,15 @@ cd "$GITHUB_WORKSPACE" || exit 1
 # initialize exit code
 exit_code=0
 
-# All files improperly formatted will be printed to the output.
-# find all C .c and .h files
+# find all C family files
 c_files=$(find . \( -name "*.[hc]" -o -name "*.cpp" -o -name "*.hpp" \) )
+blacklist=$(cat .format-ignore 2>/dev/null)
 
-# check formatting in each C file
+# check formatting in each C file not present in the blacklist
 for file in $c_files; do
-    format_diff "${file}"
+    if [[ ! " ${blacklist[@]} " =~ " ${file} " ]]; then
+        format_diff "${file}"
+    fi
 done
 
 exit "$exit_code"
