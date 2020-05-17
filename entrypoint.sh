@@ -16,6 +16,7 @@
 # Accepts a filepath argument. The filepath passed to this function must point
 # to a .c or .h file. The file is formatted with clang-format and that output is
 # compared to the original file.
+
 format_diff(){
     local filepath="$1"
     local_format="$(clang-format --style=file --fallback-style=LLVM "${filepath}")"
@@ -36,7 +37,7 @@ exit_code=0
 
 # All files improperly formatted will be printed to the output.
 # find all C .c and .h files
-c_files=$(find . -name "*.[hc]")
+c_files=$(find . \( -name "*.[hc]" -o -name "*.cpp" -o -name "*.hpp" \) )
 
 # check formatting in each C file
 for file in $c_files; do
