@@ -37,12 +37,20 @@ cd "$GITHUB_WORKSPACE" || exit 1
 exit_code=0
 
 # find all C family files
-c_files=$(find . \( -name "*.[hc]" -o -name "*.cpp" -o -name "*.hpp" \) )
-blacklist=$(cat .format-ignore 2>/dev/null)
+source_files=$(find . \( -name "*.[hc]" -o -name "*.cpp" -o -name "*.hpp" \) )
+blacklist=$(cat .format-ignore 2>/dev/null | grep -o '^[^#]*')
 
 # check formatting in each C file not present in the blacklist
-for file in $c_files; do
-    if [[ ! " ${blacklist[@]} " =~ " ${file} " ]]; then
+for file in $source_files; do
+    skip=0
+    for rule in $blacklist; do
+        if [[ " ${file} " =~ ${rule} ]]; then
+            echo Skipping \""${file}"\" according to blacklist entry \""${rule}"\"
+            skip=1
+        fi
+    done
+
+    if [ ! $skip -eq 1 ]; then
         format_diff "${file}"
     fi
 done
