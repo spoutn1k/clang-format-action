@@ -14,11 +14,15 @@ inputs:
     description: 'The path to the directory you want to check for correct C/C++formatting. Default is the full repository.'
     required: false
     default: '.'
+  ignore-paths:
+    description: 'List of paths to omit during the format check. Default is none.'
+    required: false
+    default: ''
 
 runs:
   using: "docker"
   image: "Dockerfile"
   env:
     CLANG_FORMAT_VERSION: ${{ inputs.clang-format-version }}
-  args:
-    - ${{ inputs.check-path }}
+    CHECK_PATH: ${{ inputs.check-path }}
+    BLACKLIST: ${{ inputs.ignore-path }}

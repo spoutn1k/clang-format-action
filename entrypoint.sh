@@ -28,8 +28,6 @@ format_diff() {
 	return 0
 }
 
-CHECK_PATH="$1"
-
 # Install clang-format
 echo "Installing clang-format-$CLANG_FORMAT_VERSION"
 apt-get update && apt-get install -y --no-install-recommends clang-format-"$CLANG_FORMAT_VERSION"
@@ -52,7 +50,17 @@ c_files=$(find "$CHECK_PATH" | grep -E '\.((c|C)c?(pp|xx|\+\+)*$|(h|H)h?(pp|xx|\
 
 # check formatting in each C file
 for file in $c_files; do
-	format_diff "${file}"
+    skip=0
+    for rule in $BLACKLIST; do
+        if [[ " ${file} " =~ ${rule} ]]; then
+            echo Skipping \""${file}"\" according to blacklist entry \""${rule}"\"
+            skip=1
+        fi
+    done
+
+    if [ ! $skip -eq 1 ]; then
+        format_diff "${file}"
+    fi
 done
 
 exit "$exit_code"
